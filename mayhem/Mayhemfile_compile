@@ -1,0 +1,9 @@
+project: savantenvs/tectonic
+target: compile
+testsuite:
+  - https://$MAYHEM_DOMAIN/$MAYHEM_PROJECT/$MAYHEM_TARGET/testsuite.tar
+  - file://mayhem/compile/testsuite
+cmds:
+  - cmd: /mayhem/compile
+    libfuzzer: true
+    timeout: 30

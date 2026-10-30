@@ -1,0 +1,6 @@
+\def\row#1{#1&#1&#1\cr}
+\halign{#\hfil&\hfil#\hfil&\hfil#\cr
+\row{a}\noalign{\hrule}\row{bb}\row{ccc}}
+\setbox1=\vbox{\hsize=100pt \noindent\vrule width 3pt height 4pt \par}
+\showbox1
+\bye
