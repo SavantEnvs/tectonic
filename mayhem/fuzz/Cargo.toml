@@ -1,0 +1,23 @@
+[package]
+name = "tectonic-mayhem-fuzz"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+tectonic = { path = "../..", default-features = false, features = ["external-harfbuzz"] }
+tectonic_bundles = { path = "../../crates/bundles", default-features = false }
+
+# Keep this crate out of the upstream workspace.
+[workspace]
+
+[[bin]]
+name = "compile"
+path = "fuzz_targets/compile.rs"
+test = false
+doc = false
+bench = false
