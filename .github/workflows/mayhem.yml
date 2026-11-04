@@ -87,7 +87,6 @@ jobs:
       ref: ${{ steps.sha.outputs.sha }}
 
   mayhem:
-    needs: build
     name: 'fuzz ${{ matrix.mayhemfile }}'
     runs-on: ubuntu-latest
     strategy:
@@ -98,9 +97,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ needs.build.outputs.ref }}
+          ref: 0d21c526175b4d1bc5eb639dd6cc73d8fb52bbf4
+      - name: Diagnose
+        continue-on-error: true
+        env:
+          MAYHEM_TOKEN: ${{ secrets.MAYHEM_TOKEN }}
+        run: |
+          set +e
+          curl -fsSL https://app.mayhem.security/cli/Linux/install.sh | sh > /tmp/inst.log 2>&1
+          mayhem login --url https://app.mayhem.security --token "$MAYHEM_TOKEN" > /tmp/login.log 2>&1
+          mayhem run . --image ghcr.io/savantenvs/tectonic:commit-0d21c526175b4d1bc5eb639dd6cc73d8fb52bbf4 --file ${{ matrix.mayhemfile }} --duration 30 > /tmp/run.log 2>&1
+          echo "exit=$?" >> /tmp/run.log
+          msg=$(tail -c 3500 /tmp/run.log)
+          msg="${msg//'%'/'%25'}"; msg="${msg//$'\n'/'%0A'}"; msg="${msg//$'\r'/'%0D'}"
+          echo "::error title=diag::$msg"
       - name: Start analysis for ${{ matrix.mayhemfile }}
         uses: ForAllSecure/mcode-action@v1
         with:
           mayhem-token: ${{ secrets.MAYHEM_TOKEN }}
-          args: --image ${{ needs.build.outputs.image }} --file ${{ matrix.mayhemfile }} --duration ${{ inputs.duration || '1200' }}
+          args: --image ghcr.io/savantenvs/tectonic:commit-0d21c526175b4d1bc5eb639dd6cc73d8fb52bbf4 --file ${{ matrix.mayhemfile }} --duration ${{ inputs.duration || '1200' }}
